@@ -80,8 +80,8 @@ impl Game {
 
                 let cell = newgrid.get_mut(x as int, y as int);
                 cell.alive = match neighbours {
-                    3 if !cell.alive => true,
-                    2 | 3 if cell.alive => true,
+                    2 if cell.alive => true,
+                    3 => true,
                     _ => false
                 }
             }
