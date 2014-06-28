@@ -1,5 +1,6 @@
 // Game of Life implementation in Rust by Derecho.
 
+use std::io;
 use std::io::timer;
 use std::rand::random;
 
@@ -105,9 +106,17 @@ impl Game {
 
 
 fn main() {
-    // Get these from input
-    let interval = 0.2;
-    let size = 10;
+    let default_interval = 0.2;
+    let default_size = 32;
+    let mut reader = io::stdin();
+
+    print!("Interval [{}]: ", default_interval);
+    let input = reader.read_line().ok().expect("Failed to read interval");
+    let interval = from_str::<f32>(input.as_slice().trim()).unwrap_or(default_interval);
+
+    print!("Size [{}]: ", default_size);
+    let input = reader.read_line().ok().expect("Failed to read size");
+    let size = from_str::<uint>(input.as_slice().trim()).unwrap_or(default_size);
 
     let mut game = Game { grid: Grid::random_grid(size)};
     game.run(interval);
