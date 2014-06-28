@@ -34,7 +34,6 @@ impl Grid {
         }
     }
 
-    #[allow(dead_code)]
     fn empty_grid(size: uint) -> Grid {
         let mut grid = Vec::new();
         for _ in range(0, size) {
@@ -65,6 +64,7 @@ struct Game {
 }
 impl Game {
     fn tick(&mut self) {
+        let mut newgrid = Grid::empty_grid(self.grid.size);
         for y in range(0, self.grid.size) {
             for x in range(0, self.grid.size) {
                 let mut neighbours = 0;
@@ -77,7 +77,7 @@ impl Game {
                 neighbours += (self.grid.get((x as int)  , (y as int)+1).alive == true) as uint;
                 neighbours += (self.grid.get((x as int)+1, (y as int)+1).alive == true) as uint;
 
-                let cell = self.grid.get_mut(x as int, y as int);
+                let cell = newgrid.get_mut(x as int, y as int);
                 cell.alive = match neighbours {
                     3 if !cell.alive => true,
                     2 | 3 if cell.alive => true,
@@ -85,6 +85,7 @@ impl Game {
                 }
             }
         }
+        self.grid = newgrid;
     }
 
     fn run(&mut self, interval: f32) {
