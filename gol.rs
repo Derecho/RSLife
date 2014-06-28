@@ -1,5 +1,4 @@
 // Game of Life implementation in Rust by Derecho.
-extern crate debug;
 
 use std::io::timer;
 use std::rand::random;
@@ -18,9 +17,7 @@ struct Game {
 impl Game {
     fn draw_grid(&self) {
         for row in self.grid.cells.iter() {
-            println!("[D] row: {:?}", row);
             for cell in row.iter() {
-                println!("[D] cell: {:?}", cell);
                 match cell.alive {
                     false => print!(" "),
                     true  => print!("X")
@@ -44,12 +41,13 @@ impl Game {
         }
     }
 
+    #[allow(dead_code)]
     fn empty_grid(size: int) -> Grid {
         let mut grid = vec![];
         let mut i = 0;
-        let mut j = 0;
         while i < size {
             let mut row = vec![];
+            let mut j = 0;
             while j < size {
                 row.push(Cell { alive: false });
                 j += 1;
@@ -63,9 +61,9 @@ impl Game {
     fn random_grid(size: int) -> Grid {
         let mut grid = vec![];
         let mut i = 0;
-        let mut j = 0;
         while i < size {
             let mut row = vec![];
+            let mut j = 0;
             while j < size {
                 row.push(Cell { alive: random::<bool>() });
                 j += 1;
