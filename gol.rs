@@ -44,32 +44,24 @@ impl Game {
     #[allow(dead_code)]
     fn empty_grid(size: int) -> Grid {
         let mut grid = vec![];
-        let mut i = 0;
-        while i < size {
+        for _ in range(0, size) {
             let mut row = vec![];
-            let mut j = 0;
-            while j < size {
+            for _ in range(0, size) {
                 row.push(Cell { alive: false });
-                j += 1;
             }
             grid.push(row);
-            i += 1;
         };
         Grid { cells: grid }
     }
 
     fn random_grid(size: int) -> Grid {
         let mut grid = vec![];
-        let mut i = 0;
-        while i < size {
+        for _ in range(0, size) {
             let mut row = vec![];
-            let mut j = 0;
-            while j < size {
+            for _ in range(0, size) {
                 row.push(Cell { alive: random::<bool>() });
-                j += 1;
             }
             grid.push(row);
-            i += 1;
         };
         Grid { cells: grid }
     }
