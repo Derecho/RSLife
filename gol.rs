@@ -13,8 +13,13 @@ struct Grid {
 }
 impl Grid {
     fn get<'r>(&'r self, x: int, y: int) -> &'r Cell {
-        self.cells.get((y % self.size as int) as uint)
-            .get((x % self.size as int) as uint)
+        self.cells.get(((y + (self.size as int))%(self.size as int)) as uint)
+            .get(((x + (self.size as int))%(self.size as int)) as uint)
+    }
+
+    fn get_mut<'r>(&'r mut self, x: int, y: int) -> &'r mut Cell {
+        self.cells.get_mut(((y + (self.size as int))%(self.size as int)) as uint)
+            .get_mut(((x + (self.size as int))%(self.size as int)) as uint)
     }
 
     fn draw(&self) {
@@ -59,11 +64,30 @@ struct Game {
     grid: Grid
 }
 impl Game {
-    fn tick(&self) {
-        // TODO
+    fn tick(&mut self) {
+        for y in range(0, self.grid.size) {
+            for x in range(0, self.grid.size) {
+                let mut neighbours = 0;
+                neighbours += (self.grid.get((x as int)-1, (y as int)-1).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)  , (y as int)-1).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)+1, (y as int)-1).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)-1, (y as int)  ).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)+1, (y as int)  ).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)-1, (y as int)+1).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)  , (y as int)+1).alive == true) as uint;
+                neighbours += (self.grid.get((x as int)+1, (y as int)+1).alive == true) as uint;
+
+                let cell = self.grid.get_mut(x as int, y as int);
+                cell.alive = match neighbours {
+                    3 if !cell.alive => true,
+                    2 | 3 if cell.alive => true,
+                    _ => false
+                }
+            }
+        }
     }
 
-    fn run(&self, interval: f32) {
+    fn run(&mut self, interval: f32) {
         let mut generation = 0;
         loop {
             print!("\x1B[2J");  // Clear screen
@@ -84,6 +108,6 @@ fn main() {
     let interval = 0.2;
     let size = 10;
 
-    let game = Game { grid: Grid::random_grid(size)};
+    let mut game = Game { grid: Grid::random_grid(size)};
     game.run(interval);
 }
