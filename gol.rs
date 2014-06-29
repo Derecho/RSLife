@@ -90,7 +90,7 @@ impl Game {
     }
 
     fn run(&mut self, interval: f32) {
-        let mut generation = 0;
+        let mut generation: uint = 0;
         loop {
             print!("\x1B[2J");  // Clear screen
             println!("Running Game of Life with {} fps", 1.0/interval);
@@ -118,6 +118,6 @@ fn main() {
     let input = reader.read_line().ok().expect("Failed to read size");
     let size = from_str::<uint>(input.as_slice().trim()).unwrap_or(default_size);
 
-    let mut game = Game { grid: Grid::random_grid(size)};
+    let mut game = Game { grid: Grid::random_grid(size) };
     game.run(interval);
 }
