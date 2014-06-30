@@ -1,7 +1,7 @@
 // Game of Life implementation in Rust by Derecho.
 
 use std::io;
-use std::io::timer;
+use std::io::{timer, File, BufferedReader};
 use std::rand::random;
 
 struct Cell {
@@ -56,6 +56,29 @@ impl Grid {
             }
             grid.push(row);
         };
+        Grid { cells: grid, size: size }
+    }
+    
+    fn file_grid(filename: &str) -> Grid {
+        let file = File::open(&Path::new(filename)).ok().expect("Failed to read file");
+        let mut reader = BufferedReader::new(file);
+        let mut grid = Vec::new();
+
+        for line_result in reader.lines() {
+            let mut row = Vec::new();
+            let line = line_result.ok().expect("Failed to read line");
+            for character in line.as_slice().chars() {
+                match character {
+                    ' ' => row.push(Cell { alive: false }),
+                    'X' => row.push(Cell { alive: true }),
+                    '\n' => (),
+                    _ => fail!("Invalid character in file")
+                };
+            }
+            grid.push(row);
+        }
+
+        let size = grid.len();  // TODO Enforce square input
         Grid { cells: grid, size: size }
     }
 }
@@ -114,10 +137,20 @@ fn main() {
     let input = reader.read_line().ok().expect("Failed to read interval");
     let interval = from_str::<f32>(input.as_slice().trim()).unwrap_or(default_interval);
 
-    print!("Size [{}]: ", default_size);
-    let input = reader.read_line().ok().expect("Failed to read size");
-    let size = from_str::<uint>(input.as_slice().trim()).unwrap_or(default_size);
+    print!("Filename (empty is a random grid) []: ");
+    let input = reader.read_line().ok().expect("Failed to read filename");
+    let filename = input.as_slice().trim();
 
-    let mut game = Game { grid: Grid::random_grid(size) };
+    let mut size = 0;
+    if filename == "" {
+        print!("Size [{}]: ", default_size);
+        let input = reader.read_line().ok().expect("Failed to read size");
+        size = from_str::<uint>(input.as_slice().trim()).unwrap_or(default_size);
+    }
+
+    let mut game = match filename {
+        "" => Game { grid: Grid::random_grid(size) },
+        _  => Game { grid: Grid::file_grid(filename) }
+    };
     game.run(interval);
 }
