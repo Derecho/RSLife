@@ -3,6 +3,7 @@
 use std::io;
 use std::io::{timer, File, BufferedReader};
 use std::rand::random;
+use std::mem;
 
 struct Cell {
     alive: bool
@@ -84,32 +85,33 @@ impl Grid {
 }
 
 struct Game {
-    grid: Grid
+    current_grid: Grid,
+    new_grid: Grid,
 }
 impl Game {
     fn tick(&mut self) {
-        let mut newgrid = Grid::empty_grid(self.grid.size);
-        for y in range(0, self.grid.size) {
-            for x in range(0, self.grid.size) {
+        for y in range(0, self.current_grid.size) {
+            for x in range(0, self.current_grid.size) {
                 let mut neighbours = 0;
-                neighbours += (self.grid.get((x as int)-1, (y as int)-1).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)  , (y as int)-1).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)+1, (y as int)-1).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)-1, (y as int)  ).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)+1, (y as int)  ).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)-1, (y as int)+1).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)  , (y as int)+1).alive == true) as uint;
-                neighbours += (self.grid.get((x as int)+1, (y as int)+1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)-1, (y as int)-1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)  , (y as int)-1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)+1, (y as int)-1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)-1, (y as int)  ).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)+1, (y as int)  ).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)-1, (y as int)+1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)  , (y as int)+1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as int)+1, (y as int)+1).alive == true) as uint;
 
-                let cell = newgrid.get_mut(x as int, y as int);
-                cell.alive = match neighbours {
-                    2 if cell.alive => true,
+                let current_cell = self.current_grid.get(x as int, y as int);
+                let new_cell = self.new_grid.get_mut(x as int, y as int);
+                new_cell.alive = match neighbours {
+                    2 if current_cell.alive => true,
                     3 => true,
                     _ => false
                 }
             }
         }
-        self.grid = newgrid;
+        mem::swap(&mut self.current_grid, &mut self.new_grid);
     }
 
     fn run(&mut self, interval: f32) {
@@ -118,7 +120,7 @@ impl Game {
             print!("\x1B[2J");  // Clear screen
             println!("Running Game of Life with {} fps", 1.0/interval);
             println!("Generation: {}", generation);
-            self.grid.draw();
+            self.current_grid.draw();
 
             timer::sleep((interval * 1000.0) as u64);
             self.tick();
@@ -149,8 +151,8 @@ fn main() {
     }
 
     let mut game = match filename {
-        "" => Game { grid: Grid::random_grid(size) },
-        _  => Game { grid: Grid::file_grid(filename) }
+        "" => Game { current_grid: Grid::random_grid(size), new_grid: Grid::empty_grid(size) },
+        _  => Game { current_grid: Grid::file_grid(filename), new_grid: Grid::file_grid(filename) }
     };
     game.run(interval);
 }
