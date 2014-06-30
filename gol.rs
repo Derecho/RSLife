@@ -127,6 +127,17 @@ impl Game {
             generation += 1;
         }
     }
+    fn random_game(size: uint) -> Game {
+        Game { current_grid: Grid::random_grid(size),
+               new_grid:     Grid::empty_grid(size) }
+    }
+
+    fn file_game(filename: &str) -> Game {
+        let current_grid = Grid::file_grid(filename);
+        let new_grid = Grid::empty_grid(current_grid.size);
+        Game { current_grid: current_grid,
+               new_grid:     new_grid }
+    }
 }
 
 
@@ -151,8 +162,8 @@ fn main() {
     }
 
     let mut game = match filename {
-        "" => Game { current_grid: Grid::random_grid(size), new_grid: Grid::empty_grid(size) },
-        _  => Game { current_grid: Grid::file_grid(filename), new_grid: Grid::file_grid(filename) }
+        "" => Game::random_game(size),
+        _  => Game::file_game(filename)
     };
     game.run(interval);
 }
