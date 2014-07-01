@@ -9,4 +9,5 @@ Simply typing `make` should result in a `gol` binary that you can then run.
 
 ## Usage
 You will be promted to choose an interval and a file to read a grid from. By
-not supplying a filename a random grid will be generated at size you choose.
+not supplying a filename a random grid will be generated for you at a size you
+choose.
