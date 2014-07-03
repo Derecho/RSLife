@@ -11,17 +11,18 @@ struct Cell {
 
 struct Grid {
     cells: Vec<Vec<Cell>>,
-    size: uint
+    width: uint,
+    height: uint
 }
 impl Grid {
     fn get<'r>(&'r self, x: int, y: int) -> &'r Cell {
-        self.cells.get(((y + (self.size as int))%(self.size as int)) as uint)
-            .get(((x + (self.size as int))%(self.size as int)) as uint)
+        self.cells.get(((y + (self.height as int))%(self.height as int)) as uint)
+            .get(((x + (self.width as int))%(self.width as int)) as uint)
     }
 
     fn get_mut<'r>(&'r mut self, x: int, y: int) -> &'r mut Cell {
-        self.cells.get_mut(((y + (self.size as int))%(self.size as int)) as uint)
-            .get_mut(((x + (self.size as int))%(self.size as int)) as uint)
+        self.cells.get_mut(((y + (self.height as int))%(self.height as int)) as uint)
+            .get_mut(((x + (self.width as int))%(self.width as int)) as uint)
     }
 
     fn draw(&self) {
@@ -36,28 +37,28 @@ impl Grid {
         }
     }
 
-    fn empty_grid(size: uint) -> Grid {
+    fn empty_grid(width: uint, height: uint) -> Grid {
         let mut grid = Vec::new();
-        for _ in range(0, size) {
+        for _ in range(0, height) {
             let mut row = Vec::new();
-            for _ in range(0, size) {
+            for _ in range(0, width) {
                 row.push(Cell { alive: false });
             }
             grid.push(row);
         };
-        Grid { cells: grid, size: size }
+        Grid { cells: grid, width: width, height: height }
     }
 
-    fn random_grid(size: uint) -> Grid {
+    fn random_grid(width: uint, height: uint) -> Grid {
         let mut grid = Vec::new();
-        for _ in range(0, size) {
+        for _ in range(0, height) {
             let mut row = Vec::new();
-            for _ in range(0, size) {
+            for _ in range(0, width) {
                 row.push(Cell { alive: random::<bool>() });
             }
             grid.push(row);
         };
-        Grid { cells: grid, size: size }
+        Grid { cells: grid, width: width, height: height }
     }
     
     fn file_grid(filename: &str) -> Grid {
@@ -79,8 +80,14 @@ impl Grid {
             grid.push(row);
         }
 
-        let size = grid.len();  // TODO Enforce square input
-        Grid { cells: grid, size: size }
+        // TODO Check for consistent width
+
+        if grid.len() == 0 {
+            fail!("Attempted to load empty grid");
+        }
+        let width = grid.get(0).len();
+        let height = grid.len();
+        Grid { cells: grid, width: width, height: height }
     }
 }
 
@@ -90,8 +97,8 @@ struct Game {
 }
 impl Game {
     fn tick(&mut self) {
-        for y in range(0, self.current_grid.size) {
-            for x in range(0, self.current_grid.size) {
+        for y in range(0, self.current_grid.height) {
+            for x in range(0, self.current_grid.width) {
                 let mut neighbours = 0;
                 neighbours += (self.current_grid.get((x as int)-1, (y as int)-1).alive == true) as uint;
                 neighbours += (self.current_grid.get((x as int)  , (y as int)-1).alive == true) as uint;
@@ -127,14 +134,14 @@ impl Game {
             generation += 1;
         }
     }
-    fn random_game(size: uint) -> Game {
-        Game { current_grid: Grid::random_grid(size),
-               new_grid:     Grid::empty_grid(size) }
+    fn random_game(width: uint, height: uint) -> Game {
+        Game { current_grid: Grid::random_grid(width, height),
+               new_grid:     Grid::empty_grid(width, height) }
     }
 
     fn file_game(filename: &str) -> Game {
         let current_grid = Grid::file_grid(filename);
-        let new_grid = Grid::empty_grid(current_grid.size);
+        let new_grid = Grid::empty_grid(current_grid.width, current_grid.height);
         Game { current_grid: current_grid,
                new_grid:     new_grid }
     }
@@ -143,7 +150,7 @@ impl Game {
 
 fn main() {
     let default_interval = 0.2;
-    let default_size = 32;
+    let default_width = 32;
     let mut reader = io::stdin();
 
     print!("Interval [{}]: ", default_interval);
@@ -154,15 +161,20 @@ fn main() {
     let input = reader.read_line().ok().expect("Failed to read filename");
     let filename = input.as_slice().trim();
 
-    let mut size = 0;
+    let mut width = 0;
+    let mut height = 0;
     if filename == "" {
-        print!("Size [{}]: ", default_size);
-        let input = reader.read_line().ok().expect("Failed to read size");
-        size = from_str::<uint>(input.as_slice().trim()).unwrap_or(default_size);
+        print!("Width [{}]: ", default_width);
+        let input = reader.read_line().ok().expect("Failed to read width");
+        width = from_str::<uint>(input.as_slice().trim()).unwrap_or(default_width);
+
+        print!("Height [{}]: ", width);
+        let input = reader.read_line().ok().expect("Failed to read width");
+        height = from_str::<uint>(input.as_slice().trim()).unwrap_or(width);
     }
 
     let mut game = match filename {
-        "" => Game::random_game(size),
+        "" => Game::random_game(width, height),
         _  => Game::file_game(filename)
     };
     game.run(interval);
