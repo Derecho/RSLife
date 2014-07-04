@@ -1,12 +1,17 @@
 // Game of Life implementation in Rust by Derecho.
 
 use std::io;
-use std::io::{timer, File, BufferedReader};
+use std::io::{timer, File, BufferedReader, IoError};
 use std::rand::random;
 use std::mem;
 
 struct Cell {
     alive: bool
+}
+
+enum FileGridError {
+    FileError(IoError),
+    InvalidGrid
 }
 
 struct Grid {
@@ -61,20 +66,20 @@ impl Grid {
         Grid { cells: grid, width: width, height: height }
     }
     
-    fn file_grid(filename: &str) -> Grid {
-        let file = File::open(&Path::new(filename)).ok().expect("Failed to read file");
+    fn file_grid(filename: &str) -> Result<Grid, FileGridError> {
+        let file = try!(File::open(&Path::new(filename)).map_err(FileError));
         let mut reader = BufferedReader::new(file);
         let mut grid = Vec::new();
 
         for line_result in reader.lines() {
             let mut row = Vec::new();
-            let line = line_result.ok().expect("Failed to read line");
+            let line = try!(line_result.map_err(FileError));
             for character in line.as_slice().chars() {
                 match character {
                     ' ' => row.push(Cell { alive: false }),
                     'X' => row.push(Cell { alive: true }),
                     '\n' => (),
-                    _ => fail!("Invalid character in file")
+                    _ => return Err(InvalidGrid)
                 };
             }
             grid.push(row);
@@ -83,11 +88,13 @@ impl Grid {
         // TODO Check for consistent width
 
         if grid.len() == 0 {
-            fail!("Attempted to load empty grid");
+            Err(InvalidGrid)
         }
-        let width = grid.get(0).len();
-        let height = grid.len();
-        Grid { cells: grid, width: width, height: height }
+        else {
+            let width = grid.get(0).len();
+            let height = grid.len();
+            Ok(Grid { cells: grid, width: width, height: height })
+        }
     }
 }
 
@@ -134,16 +141,17 @@ impl Game {
             generation += 1;
         }
     }
+
     fn random_game(width: uint, height: uint) -> Game {
         Game { current_grid: Grid::random_grid(width, height),
                new_grid:     Grid::empty_grid(width, height) }
     }
 
-    fn file_game(filename: &str) -> Game {
-        let current_grid = Grid::file_grid(filename);
+    fn file_game(filename: &str) -> Result<Game, FileGridError>  {
+        let current_grid = try!(Grid::file_grid(filename));
         let new_grid = Grid::empty_grid(current_grid.width, current_grid.height);
-        Game { current_grid: current_grid,
-               new_grid:     new_grid }
+        Ok(Game { current_grid: current_grid,
+               new_grid:     new_grid })
     }
 }
 
@@ -175,7 +183,7 @@ fn main() {
 
     let mut game = match filename {
         "" => Game::random_game(width, height),
-        _  => Game::file_game(filename)
+        _  => Game::file_game(filename).ok().expect("Failed to read file")
     };
     game.run(interval);
 }
