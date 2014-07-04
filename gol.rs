@@ -85,16 +85,23 @@ impl Grid {
             grid.push(row);
         }
 
-        // TODO Check for consistent width
-
         if grid.len() == 0 {
-            Err(InvalidGrid)
+            return Err(InvalidGrid);
         }
-        else {
-            let width = grid.get(0).len();
-            let height = grid.len();
-            Ok(Grid { cells: grid, width: width, height: height })
+
+        let mut found_width = 0;
+        for row in grid.iter() {
+            if found_width == 0 {
+                found_width = row.len();
+            }
+            else if found_width != row.len() {
+                return Err(InvalidGrid);
+            }
         }
+
+        let width = grid.get(0).len();
+        let height = grid.len();
+        Ok(Grid { cells: grid, width: width, height: height })
     }
 }
 
