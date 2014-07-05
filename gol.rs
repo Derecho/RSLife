@@ -1,9 +1,9 @@
 // Game of Life implementation in Rust by Derecho.
 
 use std::io;
-use std::io::{timer, File, BufferedReader, IoError};
-use std::rand::random;
+use std::io::{BufferedReader, File, IoError, timer};
 use std::mem;
+use std::rand::random;
 
 struct Cell {
     alive: bool
