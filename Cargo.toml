@@ -13,3 +13,7 @@ path = "src/main.rs"
 
 name = "rslife"
 path = "src/rslife/mod.rs"
+
+[dependencies.drawille]
+
+git = "http://github.com/P1start/drawille-rs"

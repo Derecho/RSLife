@@ -1,5 +1,6 @@
 .*.swp
 rslife
-rslife*.rlib
+lib*.rlib
 .vimsession
 target/
+external/

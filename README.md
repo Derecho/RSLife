@@ -9,7 +9,7 @@ There are currently two methods to compile RSLife.
 
 ### Cargo
 Use the standard approach of issuing `cargo build` to build the application.
-Afterwards, run the `rslife` binary.
+Afterwards, run the `main` binary in the `target` directory.
 
 ### Make
 Simply typing `make` should result in a `rslife` binary that you can then run.
