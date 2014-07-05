@@ -1,11 +1,13 @@
 RUSTC=rustc
 RUSTOPTIONS=-O -C prefer-dynamic -C link-args=-s
-APP=gol
 
-all: $(APP)
+all: rslife
 
-$(APP):
-	$(RUSTC) $(RUSTOPTIONS) $(APP).rs
+librslife:
+	$(RUSTC) $(RUSTOPTIONS) src/rslife/mod.rs
+
+rslife: librslife
+	$(RUSTC) $(RUSTOPTIONS) -L . src/main.rs -o $@
 
 clean:
-	rm $(APP)
+	rm -f rslife librslife*.rlib

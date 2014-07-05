@@ -5,7 +5,7 @@ This particular piece of code serves as a way for me to lean Rust and is my
 first project in this language.
 
 ## Compiling
-Simply typing `make` should result in a `gol` binary that you can then run.
+Simply typing `make` should result in a `rslife` binary that you can then run.
 
 ## Usage
 You will be promted to choose an interval and a file to read a grid from. By
