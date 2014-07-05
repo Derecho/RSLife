@@ -40,8 +40,11 @@ impl Game {
 
     pub fn run_ansi(&mut self, interval: f32) {
         let mut generation: uint = 0;
+
+        print!("\x1B[?25l");  // Hide cursor
+        print!("\x1B[2J");  // Clear screen
         loop {
-            print!("\x1B[2J");  // Clear screen
+            print!("\x1B[0;0H");  // Reset cursor
             println!("Running Game of Life with {} fps", 1.0/interval);
             println!("Generation: {}", generation);
             self.current_grid.draw_ansi();
@@ -56,8 +59,11 @@ impl Game {
         let mut generation: uint = 0;
         let mut canvas = braille::Canvas::new(self.current_grid.width,
                                               self.current_grid.height);
+
+        print!("\x1B[?25l");  // Hide cursor
+        print!("\x1B[2J");  // Clear screen
         loop {
-            print!("\x1B[2J");  // Clear screen
+            print!("\x1B[0;0H");  // Reset cursor
             println!("Running Game of Life with {} fps", 1.0/interval);
             println!("Generation: {}", generation);
             self.current_grid.draw_braille(&mut canvas);
