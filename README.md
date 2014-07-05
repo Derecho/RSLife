@@ -24,6 +24,8 @@ choose.
 Currently, after having exited the program, your cursor will be invisible.
 For now, you'll have to issue the following command to get it back:
 
+   ```
    setterm -cursor on
+   ```
 
 This will be fixed in a future commit.
