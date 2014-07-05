@@ -30,7 +30,7 @@ impl Grid {
             .get_mut(((x + (self.width as int))%(self.width as int)) as uint)
     }
 
-    fn draw(&self) {
+    fn draw_ansi(&self) {
         for row in self.cells.iter() {
             for cell in row.iter() {
                 match cell.alive {
@@ -135,13 +135,13 @@ impl Game {
         mem::swap(&mut self.current_grid, &mut self.new_grid);
     }
 
-    fn run(&mut self, interval: f32) {
+    fn run_ansi(&mut self, interval: f32) {
         let mut generation: uint = 0;
         loop {
             print!("\x1B[2J");  // Clear screen
             println!("Running Game of Life with {} fps", 1.0/interval);
             println!("Generation: {}", generation);
-            self.current_grid.draw();
+            self.current_grid.draw_ansi();
 
             timer::sleep((interval * 1000.0) as u64);
             self.tick();
@@ -192,5 +192,5 @@ fn main() {
         "" => Game::random_game(width, height),
         _  => Game::file_game(filename).ok().expect("Failed to read file")
     };
-    game.run(interval);
+    game.run_ansi(interval);
 }
