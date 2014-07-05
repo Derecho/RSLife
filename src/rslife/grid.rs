@@ -3,7 +3,7 @@ extern crate drawille;
 use std::io::{BufferedReader, File, IoError};
 use std::rand::random;
 
-use self::drawille::braille;
+use self::drawille::{block, braille};
 
 pub struct Cell {
     pub alive: bool
@@ -39,6 +39,17 @@ impl Grid {
                 }
             }
             println!("");
+        }
+    }
+
+    pub fn draw_block(&self, canvas: &mut block::Canvas) {
+        for y in range(0, self.height) {
+            for x in range(0, self.width) {
+                match self.get(x as int, y as int).alive {
+                    false => canvas.set(x, y, block::Black),
+                    true  => canvas.set(x, y, block::White)
+                }
+            }
         }
     }
 

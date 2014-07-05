@@ -3,7 +3,7 @@ extern crate drawille;
 use std::io::timer;
 use std::mem;
 
-use self::drawille::braille;
+use self::drawille::{block, braille};
 
 use super::grid::Grid;
 use super::grid::FileGridError;
@@ -48,6 +48,26 @@ impl Game {
             println!("Running Game of Life with {} fps", 1.0/interval);
             println!("Generation: {}", generation);
             self.current_grid.draw_ansi();
+
+            timer::sleep((interval * 1000.0) as u64);
+            self.tick();
+            generation += 1;
+        }
+    }
+
+    pub fn run_block(&mut self, interval: f32) {
+        let mut generation: uint = 0;
+        let mut canvas = block::Canvas::new(self.current_grid.width,
+                                              self.current_grid.height);
+
+        print!("\x1B[?25l");  // Hide cursor
+        print!("\x1B[2J");  // Clear screen
+        loop {
+            print!("\x1B[0;0H");  // Reset cursor
+            println!("Running Game of Life with {} fps", 1.0/interval);
+            println!("Generation: {}", generation);
+            self.current_grid.draw_block(&mut canvas);
+            println!("{}", canvas.frame());
 
             timer::sleep((interval * 1000.0) as u64);
             self.tick();
