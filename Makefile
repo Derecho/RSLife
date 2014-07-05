@@ -10,4 +10,4 @@ rslife: librslife
 	$(RUSTC) $(RUSTOPTIONS) -L . src/main.rs -o $@
 
 clean:
-	rm -f rslife librslife*.rlib
+	rm -rf rslife librslife*.rlib target/

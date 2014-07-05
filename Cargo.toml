@@ -1,0 +1,15 @@
+[package]
+
+name = "RSLife"
+version = "0.0.0"
+authors = [ "derecho@sector5d.org" ]
+
+[[bin]]
+
+name = "rslife"
+path = "src/main.rs"
+
+[[lib]]
+
+name = "rslife"
+path = "src/rslife/mod.rs"

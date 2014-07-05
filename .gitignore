@@ -2,3 +2,4 @@
 rslife
 rslife*.rlib
 .vimsession
+target/
