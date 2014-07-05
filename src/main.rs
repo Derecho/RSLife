@@ -33,5 +33,14 @@ fn main() {
         "" => rslife::Game::random_game(width, height),
         _  => rslife::Game::file_game(filename).ok().expect("Failed to read file")
     };
-    game.run_ansi(interval);
+
+    print!("Draw method: (braille/ansi) [braille]: ");
+    let input = reader.read_line().ok().expect("Failed to read draw method");
+    let draw_method = input.as_slice().trim();
+
+    match draw_method {
+        "ansi"         => game.run_ansi(interval),
+        "" | "braille" => game.run_braille(interval),
+        _              => fail!("Invalid draw method"),
+    };
 }

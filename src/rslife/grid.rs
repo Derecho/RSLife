@@ -1,5 +1,9 @@
+extern crate drawille; 
+
 use std::io::{BufferedReader, File, IoError};
 use std::rand::random;
+
+use self::drawille::braille;
 
 pub struct Cell {
     pub alive: bool
@@ -35,6 +39,17 @@ impl Grid {
                 }
             }
             println!("");
+        }
+    }
+
+    pub fn draw_braille(&self, canvas: &mut braille::Canvas) {
+        for y in range(0, self.height) {
+            for x in range(0, self.width) {
+                match self.get(x as int, y as int).alive {
+                    false => canvas.unset(x, y),
+                    true  => canvas.set(x, y)
+                }
+            }
         }
     }
 
