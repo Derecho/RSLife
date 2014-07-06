@@ -38,7 +38,7 @@ impl Game {
         mem::swap(&mut self.current_grid, &mut self.new_grid);
     }
 
-    pub fn run_ansi(&mut self, interval: f32) {
+    fn run_loop(&mut self, interval: f32, draw_closure: |&mut Game|) {
         let mut generation: uint = 0;
 
         print!("\x1B[?25l");  // Hide cursor
@@ -47,52 +47,37 @@ impl Game {
             print!("\x1B[0;0H");  // Reset cursor
             println!("Running Game of Life with {} fps", 1.0/interval);
             println!("Generation: {}", generation);
-            self.current_grid.draw_ansi();
+
+            draw_closure(self);
 
             timer::sleep((interval * 1000.0) as u64);
             self.tick();
             generation += 1;
         }
+    }
+
+    pub fn run_ansi(&mut self, interval: f32) {
+        self.run_loop(interval, |game| {
+            game.current_grid.draw_ansi();
+        });
     }
 
     pub fn run_block(&mut self, interval: f32) {
-        let mut generation: uint = 0;
         let mut canvas = block::Canvas::new(self.current_grid.width,
                                               self.current_grid.height);
-
-        print!("\x1B[?25l");  // Hide cursor
-        print!("\x1B[2J");  // Clear screen
-        loop {
-            print!("\x1B[0;0H");  // Reset cursor
-            println!("Running Game of Life with {} fps", 1.0/interval);
-            println!("Generation: {}", generation);
-            self.current_grid.draw_block(&mut canvas);
+        self.run_loop(interval, |game| {
+            game.current_grid.draw_block(&mut canvas);
             println!("{}", canvas.frame());
-
-            timer::sleep((interval * 1000.0) as u64);
-            self.tick();
-            generation += 1;
-        }
+        });
     }
 
     pub fn run_braille(&mut self, interval: f32) {
-        let mut generation: uint = 0;
         let mut canvas = braille::Canvas::new(self.current_grid.width,
                                               self.current_grid.height);
-
-        print!("\x1B[?25l");  // Hide cursor
-        print!("\x1B[2J");  // Clear screen
-        loop {
-            print!("\x1B[0;0H");  // Reset cursor
-            println!("Running Game of Life with {} fps", 1.0/interval);
-            println!("Generation: {}", generation);
-            self.current_grid.draw_braille(&mut canvas);
+        self.run_loop(interval, |game| {
+            game.current_grid.draw_braille(&mut canvas);
             println!("{}", canvas.frame());
-
-            timer::sleep((interval * 1000.0) as u64);
-            self.tick();
-            generation += 1;
-        }
+        });
     }
 
     pub fn random_game(width: uint, height: uint) -> Game {
