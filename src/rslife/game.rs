@@ -1,6 +1,7 @@
 extern crate drawille; 
 
 use std::io::timer;
+use std::io::signal::{Listener, Interrupt};
 use std::mem;
 
 use self::drawille::{block, braille};
@@ -41,6 +42,11 @@ impl Game {
     fn run_loop(&mut self, interval: f32, draw_closure: |&mut Game|) {
         let mut generation: uint = 0;
 
+        // Listener::register does not seem to be implemented yet,
+        // call below will fail (but the result is ignored).
+        let mut listener = Listener::new();
+        listener.register(Interrupt);
+
         print!("\x1B[?25l");  // Hide cursor
         print!("\x1B[2J");  // Clear screen
         loop {
@@ -53,7 +59,20 @@ impl Game {
             timer::sleep((interval * 1000.0) as u64);
             self.tick();
             generation += 1;
+
+            // Once Listener::register is implemented, the code below *should*
+            // cause a graceful shutdown of the application on a keyboard
+            // interrupt.
+            let listener_result = listener.rx.try_recv();
+            if listener_result.is_ok() {
+                match listener_result.ok().unwrap() {
+                    Interrupt => break,
+                    _         => (),
+                };
+            }
         }
+        print!("\x1B[?25h");  // Show cursor
+        println!("RSLife was interrupted by the user.");
     }
 
     pub fn run_ansi(&mut self, interval: f32) {
