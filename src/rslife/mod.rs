@@ -1,4 +1,4 @@
-#![crate_id = "rslife#0.0"]
+#![crate_name = "rslife"]
 #![crate_type = "lib"]
 
 #![feature(globs)]
