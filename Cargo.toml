@@ -9,10 +9,14 @@ authors = [ "derecho@sector5d.org" ]
 name = "rslife"
 path = "src/main.rs"
 
-[[lib]]
+[lib]
 
 name = "rslife"
 path = "src/rslife/mod.rs"
+
+[dependencies]
+
+rand = "0.3.8"
 
 [dependencies.drawille]
 

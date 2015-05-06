@@ -5,14 +5,8 @@ This particular piece of code serves as a way for me to lean Rust and is my
 first project in this language.
 
 ## Compiling
-There are currently two methods to compile RSLife.
-
-### Cargo
 Use the standard approach of issuing `cargo build` to build the application.
 Afterwards, run the `rslife` binary in the `target` directory.
-
-### Make
-Simply typing `make` should result in a `rslife` binary that you can then run.
 
 ## Usage
 You will be promted to choose an interval and a file to read a grid from. By

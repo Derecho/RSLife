@@ -1,6 +1,6 @@
 extern crate drawille; 
 
-use std::io::timer;
+use std::thread;
 use std::mem;
 
 use self::drawille::{block, braille};
@@ -14,20 +14,20 @@ pub struct Game {
 }
 impl Game {
     fn tick(&mut self) {
-        for y in range(0, self.current_grid.height) {
-            for x in range(0, self.current_grid.width) {
+        for y in 0..self.current_grid.height {
+            for x in 0..self.current_grid.width {
                 let mut neighbours = 0;
-                neighbours += (self.current_grid.get((x as int)-1, (y as int)-1).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)  , (y as int)-1).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)+1, (y as int)-1).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)-1, (y as int)  ).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)+1, (y as int)  ).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)-1, (y as int)+1).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)  , (y as int)+1).alive == true) as uint;
-                neighbours += (self.current_grid.get((x as int)+1, (y as int)+1).alive == true) as uint;
+                neighbours += (self.current_grid.get((x as i32)-1, (y as i32)-1).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)  , (y as i32)-1).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)+1, (y as i32)-1).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)-1, (y as i32)  ).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)+1, (y as i32)  ).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)-1, (y as i32)+1).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)  , (y as i32)+1).alive == true) as u32;
+                neighbours += (self.current_grid.get((x as i32)+1, (y as i32)+1).alive == true) as u32;
 
-                let current_cell = self.current_grid.get(x as int, y as int);
-                let new_cell = self.new_grid.get_mut(x as int, y as int);
+                let current_cell = self.current_grid.get(x as i32, y as i32);
+                let new_cell = self.new_grid.get_mut(x as i32, y as i32);
                 new_cell.alive = match neighbours {
                     2 if current_cell.alive => true,
                     3 => true,
@@ -38,8 +38,9 @@ impl Game {
         mem::swap(&mut self.current_grid, &mut self.new_grid);
     }
 
-    fn run_loop(&mut self, interval: f32, draw_closure: |&mut Game|) {
-        let mut generation: uint = 0;
+    fn run_loop<F>(&mut self, interval: f32, mut draw_closure: F)
+        where F : FnMut(&mut Game) {
+        let mut generation: u32 = 0;
 
         print!("\x1B[?25l");  // Hide cursor
         print!("\x1B[2J");  // Clear screen
@@ -50,7 +51,7 @@ impl Game {
 
             draw_closure(self);
 
-            timer::sleep((interval * 1000.0) as u64);
+            thread::sleep_ms((interval * 1000.0) as u32);
             self.tick();
             generation += 1;
         }
@@ -80,7 +81,7 @@ impl Game {
         });
     }
 
-    pub fn random_game(width: uint, height: uint) -> Game {
+    pub fn random_game(width: usize, height: usize) -> Game {
         Game { current_grid: Grid::random_grid(width, height),
                new_grid:     Grid::empty_grid(width, height) }
     }
