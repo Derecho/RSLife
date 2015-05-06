@@ -4,53 +4,39 @@ extern crate rslife;
 
 use std::io;
 use std::io::Write;
+use std::fmt::Display;
+use std::str::FromStr;
 
-fn main() {
-    let default_interval = 0.2;
-    let default_width = 32;
-    let mut reader = io::stdin();
+fn prompt<T: Display + FromStr>(question: &str, default: T) -> T {
     let mut input = String::new();
 
-    print!("Interval [{}]: ", default_interval);
+    print!("{} [{}]: ", question, default);
     io::stdout().flush().ok();
-    reader.read_line(&mut input).ok().expect("Failed to read interval");
-    let interval: f32 = input.trim().parse().unwrap_or(default_interval);
 
-    print!("Filename (empty is a random grid) []: ");
-    io::stdout().flush().ok();
-    input.clear();
-    reader.read_line(&mut input).ok().expect("Failed to read filename");
-    let filename = input.trim().to_owned();
-    let filename_str = &*filename;
+    io::stdin().read_line(&mut input).ok().expect("Failed to read stdin");
+    let answer: T = input.trim().parse().unwrap_or(default);
+    answer
+}
+
+fn main() {
+    let interval = prompt::<f32>("Interval", 0.2);
+
+    let filename = prompt::<String>("Filename (empty is a random grid)", String::new());
 
     let mut width = 0;
     let mut height = 0;
-    if filename_str == "" {
-        print!("Width [{}]: ", default_width);
-        io::stdout().flush().ok();
-        input.clear();
-        reader.read_line(&mut input).ok().expect("Failed to read width");
-        width = input.trim().parse().unwrap_or(default_width);
-
-        print!("Height [{}]: ", width);
-        io::stdout().flush().ok();
-        input.clear();
-        reader.read_line(&mut input).ok().expect("Failed to read width");
-        height = input.trim().parse().unwrap_or(width);
+    if filename == "" {
+        width = prompt::<usize>("Width", 32);
+        height = prompt::<usize>("Height", width);
     }
 
-    let mut game = match filename_str {
+    let mut game = match &*filename {
         "" => rslife::Game::random_game(width, height),
-        _  => rslife::Game::file_game(filename_str).ok().expect("Failed to read file")
+        _  => rslife::Game::file_game(&*filename).ok().expect("Failed to read file")
     };
 
-    print!("Draw method: (braille/block/ansi) [braille]: ");
-    io::stdout().flush().ok();
-    input.clear();
-    reader.read_line(&mut input).ok().expect("Failed to read draw method");
-    let draw_method = input.trim();
-
-    match draw_method {
+    let draw_method = prompt::<String>("Draw method (braille/block/ansi)", "braille".to_owned());
+    match &*draw_method {
         "ansi"         => game.run_ansi(interval),
         "block"        => game.run_block(interval),
         "" | "braille" => game.run_braille(interval),
