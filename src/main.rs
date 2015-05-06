@@ -7,35 +7,31 @@ use std::io::Write;
 use std::fmt::Display;
 use std::str::FromStr;
 
-fn prompt<T: Display + FromStr>(question: &str, default: T) -> T {
+fn prompt<T: Display + FromStr, U: Into<T>>(question: &str, default: U) -> T {
     let mut input = String::new();
+    let default = default.into();
 
     print!("{} [{}]: ", question, default);
     io::stdout().flush().ok();
 
     io::stdin().read_line(&mut input).ok().expect("Failed to read stdin");
-    let answer: T = input.trim().parse().unwrap_or(default);
-    answer
+    input.trim().parse().unwrap_or(default)
 }
 
 fn main() {
-    let interval = prompt::<f32>("Interval", 0.2);
+    let interval = prompt("Interval", 0.2);
 
-    let filename = prompt::<String>("Filename (empty is a random grid)", String::new());
+    let filename: String = prompt("Filename (empty is a random grid)", "");
 
-    let mut width = 0;
-    let mut height = 0;
-    if filename == "" {
-        width = prompt::<usize>("Width", 32);
-        height = prompt::<usize>("Height", width);
-    }
-
-    let mut game = match &*filename {
-        "" => rslife::Game::random_game(width, height),
-        _  => rslife::Game::file_game(&*filename).ok().expect("Failed to read file")
+    let mut game = if filename == "" {
+        let width = prompt("Width", 32);
+        let height = prompt("Height", width);
+        rslife::Game::random_game(width, height)
+    } else {
+        rslife::Game::file_game(&*filename).ok().expect("Failed to read file")
     };
 
-    let draw_method = prompt::<String>("Draw method (braille/block/ansi)", "braille".to_owned());
+    let draw_method: String = prompt("Draw method (braille/block/ansi)", "braille");
     match &*draw_method {
         "ansi"         => game.run_ansi(interval),
         "block"        => game.run_block(interval),
